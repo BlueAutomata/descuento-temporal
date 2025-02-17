@@ -65,7 +65,11 @@ fun PersonalScreenContent(
             // Document number field (accepts only digits)
             TextField(
                 value = id,
-                onValueChange = { newText -> viewModel.updateId(newText) },
+                onValueChange = { newText ->
+                    // Filter out non-digit characters
+                    val filteredText = newText.filter { it.isDigit() }
+                    viewModel.updateId(filteredText)
+                },
                 label = { Text("Número de documento") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
