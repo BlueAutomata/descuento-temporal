@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import org.luigui.descuentotemporal.texts.TextContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 
 @Composable
@@ -83,7 +84,7 @@ fun PersonalScreenContent(
                     onClick = onNavigateToQuestionnaire,
                     enabled = isFormValid // Button only enabled if fields are filled
                 ) {
-                    Text(text = "Next")
+                    Text(text = TextContent.NextButtonText)
                 }
             }
         }
