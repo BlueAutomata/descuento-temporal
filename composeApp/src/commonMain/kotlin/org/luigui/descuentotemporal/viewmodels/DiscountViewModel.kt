@@ -77,12 +77,27 @@ class DiscountViewModel : ViewModel() {
     private val _id = MutableStateFlow("")
     val id: StateFlow<String> = _id
 
+    private val _currentBlock = MutableStateFlow(1)
+    val currentBlock: StateFlow<Int> = _currentBlock
+
+    private val _blockInstructions = MutableStateFlow(true)
+    val blockInstructions: StateFlow<Boolean> = _blockInstructions
+
+
+    fun nextBlock() {
+        _currentBlock.value += 1
+    }
+
     fun updateCompleteName(newName: String) {
         _completeName.value = newName
     }
 
     fun updateId(newId: String) {
         _id.value = newId
+    }
+
+    fun dismissInstructions() {
+        _blockInstructions.value = false
     }
 
     private fun getDefaultFolderPath(): String {
@@ -113,14 +128,14 @@ class DiscountViewModel : ViewModel() {
             _leftButtonValue.value = PREDEFINED_VALUES[0]
             trial = 1
             block += 1
+            nextBlock()
             if (block > WAITING_VALUES.size) {
                 _navigateToThankYou.value = true
-            }
-            else {
+            } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
+                _blockInstructions.value = true // Show block instructions
             }
-        }
-        else {
+        } else {
             if (current.trial < PREDEFINED_VALUES.size) { // Use size - 1 to avoid index out of bounds
                 _leftButtonValue.value = PREDEFINED_VALUES[trial]
             }
@@ -161,15 +176,15 @@ class DiscountViewModel : ViewModel() {
             _leftButtonValue.value = PREDEFINED_VALUES[0]
             trial = 1
             block += 1
+            nextBlock()
             if (block > WAITING_VALUES.size) {
                 _navigateToThankYou.value = true
                 return
-            }
-            else {
+            } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
+                _blockInstructions.value = true // Show block instructions
             }
-        }
-        else {
+        } else {
             if (current.trial < PREDEFINED_VALUES.size) { // Use size - 1 to avoid index out of bounds
                 _leftButtonValue.value = PREDEFINED_VALUES[trial]
             }

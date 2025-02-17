@@ -16,6 +16,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.luigui.descuentotemporal.texts.TextContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
@@ -24,14 +29,18 @@ import java.util.Locale
 
 @Composable
 fun DiscountScreenContent(
-    viewModel: DiscountViewModel,
-    onNavigateToThankYou: () -> Unit
+    viewModel: DiscountViewModel, // <-- **ViewModel** is a key dependency
+    onNavigateToThankYou: () -> Unit // <-- **Navigation callback** is critical for flow
 ) {
+    // **State collection** using `collectAsState` for reactive updates
     val leftButtonValue by viewModel.leftButtonValue.collectAsState()
     val rightButtonValue by viewModel.rightButtonValue.collectAsState()
     val rightButtonWaitTime by viewModel.rightButtonWaitTime.collectAsState()
     val navigate by viewModel.navigateToThankYou.collectAsState()
+    val currentBlock by viewModel.currentBlock.collectAsState()
+    val showInstructions by viewModel.blockInstructions.collectAsState()
 
+    // **Currency formatting** for localization
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
 
     Box(
@@ -42,52 +51,105 @@ fun DiscountScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            // Discount question text
-            Text(
-                text = TextContent.DiscountQuestion,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            // Buttons row
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                // Button 1
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Button(onClick = {
-                        if (navigate) {
-                            onNavigateToThankYou()
-                        }
-                        else {
-                            viewModel.onLeftButtonClick()
-                        }
-                    }) {
-                        Text(text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora")
-                    }
+            if (showInstructions) {
+                // **Instructions text** displayed conditionally
+                Text(
+                    text = formatTextWithStyles(TextContent.instructions[currentBlock] ?: ""),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                // **Continue button** to dismiss instructions
+                Button(onClick = { viewModel.dismissInstructions() }) {
+                    Text(text = "Continuar")
                 }
+            } else {
+                // **Discount question text** displayed when instructions are not shown
+                Text(
+                    text = TextContent.DiscountQuestion,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Button 2
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Button(onClick = {
-                        if (navigate) {
-                            onNavigateToThankYou()
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // **Left button** for immediate reward
+                        Button(onClick = {
+                            if (navigate) {
+                                onNavigateToThankYou()
+                            } else {
+                                viewModel.onLeftButtonClick()
+                            }
+                        }) {
+                            Text(text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora")
                         }
-                        else {
-                            viewModel.onRightButtonClick()
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // **Right button** for delayed reward
+                        Button(onClick = {
+                            if (navigate) {
+                                onNavigateToThankYou()
+                            } else {
+                                viewModel.onRightButtonClick()
+                            }
+                        }) {
+                            Text(text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime")
                         }
-                    }) {
-                        Text(text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime")
                     }
                 }
             }
         }
     }
+}
+
+fun formatTextWithStyles(text: String): AnnotatedString {
+    val annotatedString = AnnotatedString.Builder()
+    val boldRegex = Regex("\\*\\*(.*?)\\*\\*") // Matches text between **
+    val underlineRegex = Regex("_(.*?)_") // Matches text between _
+    val allMatches = (boldRegex.findAll(text) + underlineRegex.findAll(text))
+        .sortedBy { it.range.first } // Sort matches by their start position
+
+    var lastIndex = 0
+    for (match in allMatches) {
+        // Ensure the match range is within the bounds of the text
+        if (match.range.first < lastIndex) {
+            // Skip overlapping matches or invalid ranges
+            continue
+        }
+
+        // Add non-styled text before the match
+        if (match.range.first > lastIndex) {
+            annotatedString.append(text.substring(lastIndex, match.range.first))
+        }
+
+        // Apply the appropriate style based on the match
+        when {
+            match.value.startsWith("**") -> {
+                // Recursively process nested formatting inside bold text
+                val innerText = match.groupValues[1]
+                annotatedString.withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(formatTextWithStyles(innerText))
+                }
+            }
+            match.value.startsWith("_") -> {
+                // Apply underline style
+                annotatedString.withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                    append(match.groupValues[1])
+                }
+            }
+        }
+        lastIndex = match.range.last + 1
+    }
+
+    // Add remaining non-styled text
+    if (lastIndex < text.length) {
+        annotatedString.append(text.substring(lastIndex))
+    }
+
+    return annotatedString.toAnnotatedString()
 }
