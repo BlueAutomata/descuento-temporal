@@ -116,7 +116,7 @@ fun PersonalScreenContent(
             ) {
                 Button(
                     onClick = {
-                        if (viewModel.doesFolderExist(id)) {
+                        if (viewModel.doesFolderExist()) {
                             // Show a message if the folder already exists
                             showFolderExistsMessage = true
                         } else {

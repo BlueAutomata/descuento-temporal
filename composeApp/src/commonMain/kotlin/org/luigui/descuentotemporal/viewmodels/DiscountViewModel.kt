@@ -97,8 +97,43 @@ class DiscountViewModel : ViewModel() {
     private val _instructionStep = MutableStateFlow(1) // 1 = Press left, 2 = Press right, 3 = Show continue
     val instructionStep: StateFlow<Int> = _instructionStep.asStateFlow()
 
+    // File to store the selected folder path
+    private val userHome: String = System.getProperty("user.home")
+    private val appDataDir = File(userHome, ".discount")
+    private val storageFile = File(appDataDir, "user_selected_folder.txt")
+
+    init {
+        // Load the last selected folder path when the ViewModel is created
+        loadSelectedFolderPath()
+    }
+
+    fun updateSelectedFolderPath(path: String) {
+        _selectedFolderPath = path
+        saveSelectedFolderPath(path)
+    }
+
+    // Function to save the selected folder path to a file
+    private fun saveSelectedFolderPath(path: String) {
+        try {
+            storageFile.writeText(path)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // Function to load the selected folder path from a file
+    private fun loadSelectedFolderPath() {
+        try {
+            if (storageFile.exists()) {
+                _selectedFolderPath = storageFile.readText()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     // Function to check if a folder with the ID already exists
-    fun doesFolderExist(id: String): Boolean {
+    fun doesFolderExist(): Boolean {
         // Replace this with your actual logic to check if the folder exists
         val sanitizedId = _id.value.toString().trim() ?: ""
         val sanitizedCompleteName = _completeName.value.trim().replace(" ", "_") ?: ""
@@ -138,10 +173,6 @@ class DiscountViewModel : ViewModel() {
 
     private fun getDefaultFolderPath(): String {
         return File(System.getProperty("user.home"), "Documents").absolutePath
-    }
-
-    fun updateSelectedFolderPath(path: String) {
-        _selectedFolderPath = path
     }
 
     fun onLeftButtonClick() {
