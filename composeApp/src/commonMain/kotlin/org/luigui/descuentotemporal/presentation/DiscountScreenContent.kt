@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -76,40 +78,47 @@ fun DiscountScreenContent(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth() // Ensure the Row takes the full width
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        // **Left button** for immediate reward
-                        Button(onClick = {
+                    // Left button for immediate reward
+                    Button(
+                        onClick = {
                             if (navigate) {
                                 onNavigateToThankYou()
                             } else {
                                 viewModel.onLeftButtonClick()
                             }
-                        }) {
-                            Text(
-                                text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora",
-                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
-                            )
-                        }
+                        },
+                        modifier = Modifier
+                            .weight(1f) // Distribute available space equally
+                            .padding(end = 8.dp) // Add spacing between buttons
+                    ) {
+                        Text(
+                            text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                            textAlign = TextAlign.Center // Center-align the text
+                        )
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        // **Right button** for delayed reward
-                        Button(onClick = {
+                    // Right button for delayed reward
+                    Button(
+                        onClick = {
                             if (navigate) {
                                 onNavigateToThankYou()
                             } else {
                                 viewModel.onRightButtonClick()
                             }
-                        }) {
-                            Text(
-                                text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime",
-                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
-                            )
-                        }
+                        },
+                        modifier = Modifier
+                            .weight(1f) // Distribute available space equally
+                            .padding(start = 8.dp) // Add spacing between buttons
+                    ) {
+                        Text(
+                            text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                            textAlign = TextAlign.Center // Center-align the text
+                        )
                     }
                 }
             }
