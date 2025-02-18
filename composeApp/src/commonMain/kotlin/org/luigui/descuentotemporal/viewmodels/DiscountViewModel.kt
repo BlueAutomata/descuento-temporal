@@ -97,6 +97,19 @@ class DiscountViewModel : ViewModel() {
     private val _instructionStep = MutableStateFlow(1) // 1 = Press left, 2 = Press right, 3 = Show continue
     val instructionStep: StateFlow<Int> = _instructionStep.asStateFlow()
 
+    // Function to check if a folder with the ID already exists
+    fun doesFolderExist(id: String): Boolean {
+        // Replace this with your actual logic to check if the folder exists
+        val sanitizedId = _id.value.toString().trim() ?: ""
+        val sanitizedCompleteName = _completeName.value.trim().replace(" ", "_") ?: ""
+
+        // Construct the folder name correctly
+        val folderName = listOf(sanitizedId, sanitizedCompleteName).filter { it.isNotEmpty() }.joinToString("_")
+
+        val folderPath = "$selectedFolderPath${File.separator}${folderName}"
+        return File(folderPath).exists()
+    }
+
 
     fun updateExampleValue(block_num: Int): Double {
         return EXAMPLE_VALUES[block_num -1]
