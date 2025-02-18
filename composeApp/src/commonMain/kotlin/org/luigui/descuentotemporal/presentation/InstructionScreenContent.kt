@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.luigui.descuentotemporal.texts.TextContent
 
 @Composable
@@ -34,14 +35,14 @@ fun InstructionScreenContent(
             // Consent heading
             Text(
                 text = TextContent.InstructionsHeading,
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp), // Increase font size
                 modifier = Modifier.padding(vertical = 8.dp) // Add some vertical spacing
             )
 
             // Additional text
             Text(
                 text = TextContent.Instructions,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), // Increase font size
                 modifier = Modifier.padding(vertical = 8.dp) // Add some vertical spacing
             )
 
@@ -54,7 +55,10 @@ fun InstructionScreenContent(
                 horizontalArrangement = Arrangement.End // Align button to the right
             ) {
                 Button(onClick = onNavigateToDiscount) {
-                    Text(text = TextContent.NextButtonText)
+                    Text(
+                        text = TextContent.NextButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increase button text size
+                    )
                 }
             }
         }

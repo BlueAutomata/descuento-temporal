@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.luigui.descuentotemporal.texts.TextContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 
@@ -46,9 +48,10 @@ fun PersonalScreenContent(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Heading
             Text(
                 text = "Registro de datos",
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 32.sp), // Increased font size
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
@@ -56,10 +59,16 @@ fun PersonalScreenContent(
             TextField(
                 value = completeName,
                 onValueChange = { newText -> viewModel.updateCompleteName(newText) },
-                label = { Text("Nombre Completo") },
+                label = {
+                    Text(
+                        text = "Nombre Completo",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                    )
+                },
                 modifier = Modifier
                     .padding(vertical = 8.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp) // Increased font size for input text
             )
 
             // Document number field (accepts only digits)
@@ -70,11 +79,17 @@ fun PersonalScreenContent(
                     val filteredText = newText.filter { it.isDigit() }
                     viewModel.updateId(filteredText)
                 },
-                label = { Text("Número de documento") },
+                label = {
+                    Text(
+                        text = "Número de documento",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                    )
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .padding(vertical = 8.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp) // Increased font size for input text
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -88,7 +103,10 @@ fun PersonalScreenContent(
                     onClick = onNavigateToQuestionnaire,
                     enabled = isFormValid // Button only enabled if fields are filled
                 ) {
-                    Text(text = TextContent.NextButtonText)
+                    Text(
+                        text = TextContent.NextButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                    )
                 }
             }
         }

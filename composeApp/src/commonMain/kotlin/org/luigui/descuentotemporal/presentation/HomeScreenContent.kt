@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 
 @Composable
@@ -38,7 +39,7 @@ fun HomeScreenContent(
             // Welcome text in Spanish
             Text(
                 text = "¡Bienvenido!",
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 32.sp), // Increased font size
                 modifier = Modifier
                     .padding(top = 32.dp)
                     .align(Alignment.CenterHorizontally)
@@ -61,7 +62,12 @@ fun HomeScreenContent(
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp),
-                    label = { Text("Carpeta Seleccionada") }, // Updated to Spanish
+                    label = {
+                        Text(
+                            text = "Carpeta Seleccionada", // Updated to Spanish
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                        )
+                    },
                     readOnly = true // Make the text field read-only
                 )
 
@@ -74,7 +80,10 @@ fun HomeScreenContent(
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 ) {
-                    Text(text = "Examinar") // Updated to Spanish
+                    Text(
+                        text = "Examinar", // Updated to Spanish
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                    )
                 }
             }
 
@@ -90,7 +99,10 @@ fun HomeScreenContent(
                 Button(
                     onClick = onNavigateToConsent
                 ) {
-                    Text(text = "Siguiente") // Updated to Spanish
+                    Text(
+                        text = "Siguiente", // Updated to Spanish
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                    )
                 }
             }
         }

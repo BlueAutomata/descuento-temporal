@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.luigui.descuentotemporal.texts.TextContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 import java.text.NumberFormat
@@ -55,18 +56,21 @@ fun DiscountScreenContent(
                 // **Instructions text** displayed conditionally
                 Text(
                     text = formatTextWithStyles(TextContent.instructions[currentBlock] ?: ""),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), // Increased font size
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 // **Continue button** to dismiss instructions
                 Button(onClick = { viewModel.dismissInstructions() }) {
-                    Text(text = "Continuar")
+                    Text(
+                        text = "Continuar",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                    )
                 }
             } else {
                 // **Discount question text** displayed when instructions are not shown
                 Text(
                     text = TextContent.DiscountQuestion,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp), // Increased font size
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
@@ -83,7 +87,10 @@ fun DiscountScreenContent(
                                 viewModel.onLeftButtonClick()
                             }
                         }) {
-                            Text(text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora")
+                            Text(
+                                text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                            )
                         }
                     }
 
@@ -98,7 +105,10 @@ fun DiscountScreenContent(
                                 viewModel.onRightButtonClick()
                             }
                         }) {
-                            Text(text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime")
+                            Text(
+                                text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                            )
                         }
                     }
                 }
