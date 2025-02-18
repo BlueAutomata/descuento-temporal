@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
@@ -53,6 +54,15 @@ class DiscountViewModel : ViewModel() {
         "6 años"
     )
 
+    private val EXAMPLE_VALUES = listOf(
+        1510825.56,
+        821090.16,
+        1097437.63,
+        405709.44,
+        1785345.78,
+        682739.41
+    )
+
     private val _currentMeasurement = mutableStateOf(Measurement())
     val currentMeasurement: Measurement get() = _currentMeasurement.value
 
@@ -83,6 +93,19 @@ class DiscountViewModel : ViewModel() {
     private val _blockInstructions = MutableStateFlow(true)
     val blockInstructions: StateFlow<Boolean> = _blockInstructions
 
+    // New state variable for instruction step
+    private val _instructionStep = MutableStateFlow(1) // 1 = Press left, 2 = Press right, 3 = Show continue
+    val instructionStep: StateFlow<Int> = _instructionStep.asStateFlow()
+
+
+    fun updateExampleValue(block_num: Int): Double {
+        return EXAMPLE_VALUES[block_num -1]
+    }
+
+    // Function to update instruction step
+    fun updateInstructionStep(step: Int) {
+        _instructionStep.value = step
+    }
 
     fun nextBlock() {
         _currentBlock.value += 1
