@@ -155,7 +155,7 @@ class DiscountViewModel : ViewModel() {
             side = "izquierda",
             trial = current.trial,
             value = _leftButtonValue.value,
-            change = current.side == "derecha"
+            change = if (current.trial == 1) false else if (current.side == "derecha") true else false
         )
 
         var block = current.block
@@ -203,7 +203,7 @@ class DiscountViewModel : ViewModel() {
             side = "derecha",
             trial = current.trial,
             value = ORIGINAL_VALUE,
-            change = current.side == "izquierda"
+            change = if (current.trial == 1) false else if (current.side == "izquierda") true else false
         )
 
         var block = current.block
@@ -285,7 +285,7 @@ class DiscountViewModel : ViewModel() {
             // Create header row if needed
             val headerRow = sheet.createRow(0)
             headerRow.createCell(0).setCellValue("Fecha y Hora")
-            headerRow.createCell(1).setCellValue("Id")
+            headerRow.createCell(1).setCellValue("Cedula")
             headerRow.createCell(2).setCellValue("Nombre completo")
             headerRow.createCell(3).setCellValue("Bloque")
             headerRow.createCell(4).setCellValue("Ensayo")
