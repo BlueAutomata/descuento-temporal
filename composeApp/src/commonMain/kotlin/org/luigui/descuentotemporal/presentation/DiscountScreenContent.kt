@@ -82,7 +82,7 @@ fun DiscountScreenContent(
                         ) {
                             Text(
                                 text = buildAnnotatedString {
-                                    append("Ganar ${currencyFormat.format(leftButtonValue)} ")
+                                    append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = currentBlock))} ")
                                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                         append("ahora")
                                     }
@@ -138,12 +138,12 @@ fun DiscountScreenContent(
                 // **Dynamic instruction text based on step**
                 when (instructionStep) {
                     1 -> Text(
-                        text = "Por favor, presiona el botón izquierdo.",
+                        text = "Por favor, presiona el botón de ganar ahora.",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     2 -> Text(
-                        text = "Ahora, presiona el botón derecho.",
+                        text = "Ahora, presiona el botón de ganar después.",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
