@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -95,7 +96,12 @@ fun DiscountScreenContent(
                             .padding(end = 8.dp) // Add spacing between buttons
                     ) {
                         Text(
-                            text = "Ganar ${currencyFormat.format(leftButtonValue)} ahora",
+                            text = buildAnnotatedString {
+                                append("Ganar ${currencyFormat.format(leftButtonValue)} ")
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("ahora")
+                                }
+                            },
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                             textAlign = TextAlign.Center // Center-align the text
                         )
@@ -115,7 +121,13 @@ fun DiscountScreenContent(
                             .padding(start = 8.dp) // Add spacing between buttons
                     ) {
                         Text(
-                            text = "Ganar ${currencyFormat.format(rightButtonValue)} después de $rightButtonWaitTime",
+                            text = buildAnnotatedString {
+                                append("Ganar ${currencyFormat.format(rightButtonValue)} ")
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("después")
+                                }
+                                append(" de $rightButtonWaitTime")
+                            },
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                             textAlign = TextAlign.Center // Center-align the text
                         )
