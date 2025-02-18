@@ -99,8 +99,7 @@ class DiscountViewModel : ViewModel() {
 
     // File to store the selected folder path
     private val userHome: String = System.getProperty("user.home")
-    private val appDataDir = File(userHome, ".discount")
-    private val storageFile = File(appDataDir, "user_selected_folder.txt")
+    private val storageFile = File(userHome, "user_selected_folder.txt")
 
     init {
         // Load the last selected folder path when the ViewModel is created
