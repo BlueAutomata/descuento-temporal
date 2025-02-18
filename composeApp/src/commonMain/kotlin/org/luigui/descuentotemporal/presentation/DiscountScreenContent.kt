@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +41,7 @@ fun DiscountScreenContent(
     val navigate by viewModel.navigateToThankYou.collectAsState()
     val currentBlock by viewModel.currentBlock.collectAsState()
     val showInstructions by viewModel.blockInstructions.collectAsState()
+    val instructionStep by viewModel.instructionStep.collectAsState() // Observe instruction step from ViewModel
 
     // **Currency formatting** for localization
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
@@ -62,11 +61,96 @@ fun DiscountScreenContent(
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), // Increased font size
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                // **Continue button** to dismiss instructions
-                Button(onClick = { viewModel.dismissInstructions() }) {
-                    Text(
-                        text = "Continuar",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+
+                // **Hide buttons when instructionStep == 3**
+                if (instructionStep != 3) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth() // Ensure the Row takes the full width
+                    ) {
+                        // Left button for immediate reward
+                        Button(
+                            onClick = {
+                                if (instructionStep == 1) {
+                                    viewModel.updateInstructionStep(2) // Move to the next step
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f) // Distribute available space equally
+                                .padding(end = 8.dp) // Add spacing between buttons
+                        ) {
+                            Text(
+                                text = buildAnnotatedString {
+                                    append("Ganar ${currencyFormat.format(leftButtonValue)} ")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("ahora")
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                                textAlign = TextAlign.Center // Center-align the text
+                            )
+                        }
+
+                        // Right button for delayed reward
+                        Button(
+                            onClick = {
+                                if (instructionStep == 2) {
+                                    viewModel.updateInstructionStep(3) // Move to the next step
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f) // Distribute available space equally
+                                .padding(start = 8.dp) // Add spacing between buttons
+                        ) {
+                            Text(
+                                text = buildAnnotatedString {
+                                    append("Ganar ${currencyFormat.format(rightButtonValue)} ")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("después")
+                                    }
+                                    append(" de $rightButtonWaitTime")
+                                },
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                                textAlign = TextAlign.Center // Center-align the text
+                            )
+                        }
+                    }
+                }
+
+                // **Continue button (shown only in step 3)**
+                if (instructionStep == 3) {
+                    Button(
+                        onClick = {
+                            // Reset instruction step and move to the next block
+                            viewModel.updateInstructionStep(1)
+                            viewModel.dismissInstructions()
+                        },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text(
+                            text = "Continuar",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
+                        )
+                    }
+                }
+
+                // **Dynamic instruction text based on step**
+                when (instructionStep) {
+                    1 -> Text(
+                        text = "Por favor, presiona el botón izquierdo.",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    2 -> Text(
+                        text = "Ahora, presiona el botón derecho.",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    3 -> Text(
+                        text = "¡Bien hecho! Presiona Continuar para seguir.",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
             } else {
