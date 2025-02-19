@@ -210,7 +210,6 @@ class DiscountViewModel : ViewModel() {
 
         writeMeasurementToExcel(selectedState)
 
-        // New State
         _currentMeasurement.value = current.copy(
             userName = _completeName.value,
             id = _id.value,
