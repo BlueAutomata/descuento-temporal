@@ -244,7 +244,6 @@ class DiscountViewModel : ViewModel() {
             nextBlock()
             if (block > WAITING_VALUES.size) {
                 _navigateToThankYou.value = true
-                return
             } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
                 _blockInstructions.value = true // Show block instructions
