@@ -50,9 +50,9 @@ object TextContent {
     private val RawInstructions = """
         A continuación, responderás a una serie de elecciones para ganar recompensas monetarias. No existen respuestas correctas o incorrectas, ni hay un tiempo límite para responder. Las recompensas no las recibirás durante las elecciones ni al final de la sesión, pero te pedimos que respondas como si fueras a ganarlas. Las recompensas no son acumulables a lo largo de las alternativas; cada recompensa es independiente una de la otra. Elige la opción que tú prefieras y no la que otra persona elegiría. Responde conforme a tus preferencias el día de HOY. Evita responder en función del pasado o futuro. 
 
-        Las opciones de la parte superior despliegan las recompensas que puedes ganar HOY, mientras que las opciones de la parte inferior despliegan las recompensas que puedes ganar después de una demora específica.
+        Las opciones del lado izquierdo despliegan las recompensas que puedes ganar HOY, mientras que las opciones del lado derecho despliegan las recompensas que puedes ganar después de una demora específica.
 
-        Para hacer tus elecciones: marca y da clic en una opción dentro de la casilla que corresponda con tu preferencia.
+        Para hacer tus elecciones: da clic en la opción que corresponda con tu preferencia.
     """.trimIndent()
 
     private val styledPhrases = listOf(

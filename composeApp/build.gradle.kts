@@ -95,8 +95,8 @@ compose.desktop {
         mainClass = "org.luigui.descuentotemporal.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.luigui.descuentotemporal"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
+            packageName = "Descuento Temporal"
             packageVersion = "1.0.0"
         }
     }
