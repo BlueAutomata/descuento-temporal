@@ -44,7 +44,10 @@ fun DiscountScreenContent(
     val instructionStep by viewModel.instructionStep.collectAsState() // Observe instruction step from ViewModel
 
     // **Currency formatting** for localization
-    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
+        maximumFractionDigits = 0
+        minimumFractionDigits = 0
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
