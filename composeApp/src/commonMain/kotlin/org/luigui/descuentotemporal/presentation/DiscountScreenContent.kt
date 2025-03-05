@@ -59,11 +59,27 @@ fun DiscountScreenContent(
             modifier = Modifier.padding(16.dp)
         ) {
             if (showInstructions) {
-                Text(
-                    text = "EJEMPLO VALORES POR BLOQUES",
-                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
+                when (instructionStep) {
+                    1 -> Text(
+                        text = "EJEMPLO 1",
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    2 -> Text(
+                        text = "EJEMPLO 2",
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    3 -> Text(
+                        text = "DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2",
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
 
                 // **Instructions text** displayed conditionally
                 Text(
@@ -242,6 +258,21 @@ fun DiscountScreenContent(
 
         // **Next Button** (shown when buttons are hidden and showInstructions is false)
         if (!showButtons && !showInstructions) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ){
+                Text(
+                    text = "¡Respuesta guardada!",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                    textAlign = TextAlign.Center // Center-align the text
+                )
+                Text(
+                    text = "Para continuar da click en siguiente.",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                    textAlign = TextAlign.Center // Center-align the text
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
