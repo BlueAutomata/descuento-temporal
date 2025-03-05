@@ -42,6 +42,7 @@ fun DiscountScreenContent(
     val currentBlock by viewModel.currentBlock.collectAsState()
     val showInstructions by viewModel.blockInstructions.collectAsState()
     val instructionStep by viewModel.instructionStep.collectAsState() // Observe instruction step from ViewModel
+    val showButtons by viewModel.showButtons.collectAsState() // Observe button visibility state
 
     // **Currency formatting** for localization
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
@@ -58,6 +59,12 @@ fun DiscountScreenContent(
             modifier = Modifier.padding(16.dp)
         ) {
             if (showInstructions) {
+                Text(
+                    text = "EJEMPLO VALORES POR BLOQUES",
+                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+
                 // **Instructions text** displayed conditionally
                 Text(
                     text = formatTextWithStyles(TextContent.instructions[currentBlock] ?: ""),
@@ -128,6 +135,7 @@ fun DiscountScreenContent(
                             // Reset instruction step and move to the next block
                             viewModel.updateInstructionStep(1)
                             viewModel.dismissInstructions()
+                            viewModel.resetButtonsVisibility() // Reset button visibility when instructions are dismissed
                         },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
@@ -157,68 +165,92 @@ fun DiscountScreenContent(
                     )
                 }
             } else {
-                // **Discount question text** displayed when instructions are not shown
-                Text(
-                    text = TextContent.DiscountQuestion,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp), // Increased font size
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                if (showButtons) {
+                    Text(
+                        text = TextContent.DiscountQuestion,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp), // Increased font size
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth() // Ensure the Row takes the full width
+                    ) {
+                        // Left button for immediate reward
+                        Button(
+                            onClick = {
+                                if (navigate) {
+                                    onNavigateToThankYou()
+                                } else {
+                                    viewModel.onLeftButtonClick()
+                                    viewModel.toggleButtonsVisibility() // Hide buttons after click
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f) // Distribute available space equally
+                                .padding(end = 8.dp) // Add spacing between buttons
+                        ) {
+                            Text(
+                                text = buildAnnotatedString {
+                                    append("Ganar ${currencyFormat.format(leftButtonValue)} ")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("ahora")
+                                    }
+                                },
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                                textAlign = TextAlign.Center // Center-align the text
+                            )
+                        }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth() // Ensure the Row takes the full width
+                        // Right button for delayed reward
+                        Button(
+                            onClick = {
+                                if (navigate) {
+                                    onNavigateToThankYou()
+                                } else {
+                                    viewModel.onRightButtonClick()
+                                    viewModel.toggleButtonsVisibility() // Hide buttons after click
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f) // Distribute available space equally
+                                .padding(start = 8.dp) // Add spacing between buttons
+                        ) {
+                            Text(
+                                text = buildAnnotatedString {
+                                    append("Ganar ${currencyFormat.format(rightButtonValue)} ")
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("después")
+                                    }
+                                    append(" de $rightButtonWaitTime")
+                                },
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                                textAlign = TextAlign.Center // Center-align the text
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // **Next Button** (shown when buttons are hidden and showInstructions is false)
+        if (!showButtons && !showInstructions) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomEnd // Align to bottom right
+            ) {
+                Button(
+                    onClick = {
+                        viewModel.toggleButtonsVisibility() // Show buttons again
+                    },
+                    modifier = Modifier.padding(8.dp)
                 ) {
-                    // Left button for immediate reward
-                    Button(
-                        onClick = {
-                            if (navigate) {
-                                onNavigateToThankYou()
-                            } else {
-                                viewModel.onLeftButtonClick()
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f) // Distribute available space equally
-                            .padding(end = 8.dp) // Add spacing between buttons
-                    ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Ganar ${currencyFormat.format(leftButtonValue)} ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("ahora")
-                                }
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            textAlign = TextAlign.Center // Center-align the text
-                        )
-                    }
-
-                    // Right button for delayed reward
-                    Button(
-                        onClick = {
-                            if (navigate) {
-                                onNavigateToThankYou()
-                            } else {
-                                viewModel.onRightButtonClick()
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f) // Distribute available space equally
-                            .padding(start = 8.dp) // Add spacing between buttons
-                    ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Ganar ${currencyFormat.format(rightButtonValue)} ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("después")
-                                }
-                                append(" de $rightButtonWaitTime")
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            textAlign = TextAlign.Center // Center-align the text
-                        )
-                    }
+                    Text(
+                        text = TextContent.NextButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                    )
                 }
             }
         }

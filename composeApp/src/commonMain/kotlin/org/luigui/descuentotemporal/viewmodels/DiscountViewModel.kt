@@ -101,6 +101,18 @@ class DiscountViewModel : ViewModel() {
     private val userHome: String = System.getProperty("user.home")
     private val storageFile = File(userHome, "user_selected_folder.txt")
 
+    private val _showButtons = MutableStateFlow(true)
+    val showButtons: StateFlow<Boolean> get() = _showButtons
+
+    // Function to toggle button visibility
+    fun toggleButtonsVisibility() {
+        _showButtons.value = !_showButtons.value
+    }
+
+    fun resetButtonsVisibility() {
+        _showButtons.value = true
+    }
+
     init {
         // Load the last selected folder path when the ViewModel is created
         loadSelectedFolderPath()
