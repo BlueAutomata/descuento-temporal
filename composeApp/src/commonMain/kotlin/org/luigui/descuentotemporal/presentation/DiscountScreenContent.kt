@@ -128,24 +128,6 @@ fun DiscountScreenContent(
                     }
                 }
 
-                // **Continue button (shown only in step 3)**
-                if (instructionStep == 3) {
-                    Button(
-                        onClick = {
-                            // Reset instruction step and move to the next block
-                            viewModel.updateInstructionStep(1)
-                            viewModel.dismissInstructions()
-                            viewModel.resetButtonsVisibility() // Reset button visibility when instructions are dismissed
-                        },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text(
-                            text = "Continuar",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) // Increased font size
-                        )
-                    }
-                }
-
                 // **Dynamic instruction text based on step**
                 when (instructionStep) {
                     1 -> Text(
@@ -229,6 +211,31 @@ fun DiscountScreenContent(
                             )
                         }
                     }
+                }
+            }
+        }
+
+        // **Continuar Button** (shown only in step 3 of instructions)
+        if (showInstructions && instructionStep == 3) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomEnd // Align to bottom right
+            ) {
+                Button(
+                    onClick = {
+                        // Reset instruction step and move to the next block
+                        viewModel.updateInstructionStep(1)
+                        viewModel.dismissInstructions()
+                        viewModel.resetButtonsVisibility() // Reset button visibility when instructions are dismissed
+                    },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        text = TextContent.NextButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                    )
                 }
             }
         }
