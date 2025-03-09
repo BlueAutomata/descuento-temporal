@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.luigui.descuentotemporal.texts.TextContent
-import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 
 @Composable
 fun ExperimentStartScreenContent(
