@@ -105,4 +105,6 @@ object TextContent {
         5 to "Imagina que hoy debes elegir entre **GANAR** una **cantidad menor de dinero entregada AHORA** y otra **cantidad mayor de dinero entregada después de _1 AÑO_**. La cantidad a ganar será totalmente segura y no habrá impedimentos para obtenerla. En la alternativa demorada, solo debes esperar el tiempo indicado para obtener la recompensa. Elige la opción de tu preferencia.\n\n**Responde cada elección en el orden en el que aparecen. No saltes elecciones.**",
         6 to "Imagina que hoy debes elegir entre **GANAR** una **cantidad menor de dinero entregada AHORA** y otra **cantidad mayor de dinero entregada después de _6 AÑOS_**. La cantidad a ganar será totalmente segura y no habrá impedimentos para obtenerla. En la alternativa demorada, solo debes esperar el tiempo indicado para obtener la recompensa. Elige la opción de tu preferencia.\n\n**Responde cada elección en el orden en el que aparecen. No saltes elecciones.**"
     )
+
+    val startExperiment = "Comienza el experimento."
 }
