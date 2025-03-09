@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -24,6 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import org.luigui.descuentotemporal.texts.TextContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 import java.text.NumberFormat
@@ -44,10 +51,29 @@ fun DiscountScreenContent(
     val instructionStep by viewModel.instructionStep.collectAsState() // Observe instruction step from ViewModel
     val showButtons by viewModel.showButtons.collectAsState() // Observe button visibility state
 
+    // **State to control the visibility of the Next button after delay**
+    var showNextButton by remember { mutableStateOf(false) }
+
+    // **State to control the visibility of the loading spinner**
+    var showLoading by remember { mutableStateOf(false) }
+
     // **Currency formatting** for localization
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
         maximumFractionDigits = 0
         minimumFractionDigits = 0
+    }
+
+    // **LaunchedEffect to handle the delay for showing the Next button**
+    LaunchedEffect(showButtons) {
+        if (!showButtons && !showInstructions) {
+            showLoading = true // Show loading spinner
+            delay(1000) // Delay for 1 second
+            showLoading = false // Hide loading spinner
+            showNextButton = true // Show Next button
+        } else {
+            showNextButton = false
+            showLoading = false
+        }
     }
 
     Box(
@@ -79,7 +105,6 @@ fun DiscountScreenContent(
                         textAlign = TextAlign.Center
                     )
                 }
-
 
                 // **Instructions text** displayed conditionally
                 Text(
@@ -256,20 +281,28 @@ fun DiscountScreenContent(
             }
         }
 
+        // **Loading Spinner** (shown while waiting for the Next button to appear)
+        if (showLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
         // **Next Button** (shown when buttons are hidden and showInstructions is false)
-        if (!showButtons && !showInstructions) {
+        if (!showButtons && !showInstructions && showNextButton) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(16.dp)
             ){
                 Text(
                     text = "¡Respuesta guardada!",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                     textAlign = TextAlign.Center // Center-align the text
                 )
                 Text(
                     text = "Para continuar da click en siguiente.",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
                     textAlign = TextAlign.Center // Center-align the text
                 )
             }
