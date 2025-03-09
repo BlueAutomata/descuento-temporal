@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -103,6 +104,27 @@ fun DiscountScreenContent(
                         style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
                         modifier = Modifier.padding(vertical = 8.dp),
                         textAlign = TextAlign.Center
+                    )
+                }
+
+                if (currentBlock > 1) {
+                    Text(
+                        text = "CAMBO DE SITUACIÓN",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = 28.sp,
+                            color = Color.Red // Set the text color to red
+                        ),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Por favor lee atentamente las siguientes instrucciones:",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontSize = 26.sp,
+                            color = Color.Red // Set the text color to red
+                        ),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center,
                     )
                 }
 
