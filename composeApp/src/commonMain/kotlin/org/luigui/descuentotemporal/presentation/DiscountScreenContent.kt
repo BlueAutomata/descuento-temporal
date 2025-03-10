@@ -111,22 +111,6 @@ private fun rememberCurrencyFormat(): NumberFormat {
     }
 }
 
-private suspend fun handleLoadingAndNextButtonVisibility(
-    uiState: DiscountUiState,
-    showLoading: (Boolean) -> Unit,
-    showNextButton: (Boolean) -> Unit
-) {
-    if (!uiState.showButtons && !uiState.showInstructions) {
-        showLoading(true)
-        delay(1000)
-        showLoading(false)
-        showNextButton(true)
-    } else {
-        showNextButton(false)
-        showLoading(false)
-    }
-}
-
 @Composable
 private fun renderInstructions(
     uiState: DiscountUiState,

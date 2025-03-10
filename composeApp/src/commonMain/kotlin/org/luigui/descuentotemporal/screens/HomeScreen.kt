@@ -1,11 +1,9 @@
 package org.luigui.descuentotemporal.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import org.luigui.descuentotemporal.presentation.HomeScreenContent
-import org.luigui.descuentotemporal.presentation.PersonalScreenContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 import java.io.File
 import javax.swing.JFileChooser
