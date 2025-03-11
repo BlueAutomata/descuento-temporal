@@ -50,6 +50,7 @@ fun DiscountScreenContent(
     var showLoading by remember { mutableStateOf(false) }
     var showInstructionButtons by remember { mutableStateOf(true) } // State to control instruction buttons visibility
     var showInstructionsContent by remember { mutableStateOf(true) } // State to control instructions content visibility
+    var lastPressedButton by remember { mutableStateOf<ButtonType?>(null) } // Track which button was pressed
 
     // Currency formatting
     val currencyFormat = rememberCurrencyFormat()
@@ -76,6 +77,7 @@ fun DiscountScreenContent(
             showLoading = false // Hide loading spinner
             showInstructionButtons = true // Show instruction buttons again
             showInstructionsContent = true // Show instructions content again
+            lastPressedButton = null // Reset the last pressed button
         }
     }
 
@@ -90,15 +92,17 @@ fun DiscountScreenContent(
         ) {
             if (!showLoading) {
                 if (uiState.showInstructions && showInstructionsContent) { // Conditionally render instructions
-                    renderInstructions(uiState, viewModel, currencyFormat, showInstructionButtons) {
-                        showInstructionButtons = false // Hide instruction buttons
-                        showLoading = true // Show loading spinner
+                    renderInstructions(uiState, viewModel, currencyFormat, showInstructionButtons, lastPressedButton) { buttonType ->
+                        lastPressedButton = buttonType // Track which button was pressed
+                        if (isCorrectButtonPressed(uiState.instructionStep, buttonType)) {
+                            showInstructionButtons = false // Hide instruction buttons
+                            showLoading = true // Show loading spinner
+                        }
                     }
                 } else {
                     renderDiscountQuestion(uiState, viewModel, onNavigateToThankYou, currencyFormat)
                 }
             }
-
         }
 
         // Render the loading spinner on top of the UI
@@ -117,13 +121,29 @@ fun DiscountScreenContent(
     }
 }
 
+// Enum to track which button was pressed
+enum class ButtonType {
+    WIN_NOW,
+    WIN_LATER
+}
+
+// Helper function to check if the correct button was pressed
+private fun isCorrectButtonPressed(instructionStep: Int, buttonType: ButtonType?): Boolean {
+    return when (instructionStep) {
+        1 -> buttonType == ButtonType.WIN_NOW // Step 1: Correct button is "Win Now"
+        2 -> buttonType == ButtonType.WIN_LATER // Step 2: Correct button is "Win Later"
+        else -> false // No correct button for other steps
+    }
+}
+
 @Composable
 private fun renderInstructions(
     uiState: DiscountUiState,
     viewModel: DiscountViewModel,
     currencyFormat: NumberFormat,
     showInstructionButtons: Boolean, // New parameter to control button visibility
-    onButtonClick: () -> Unit // Callback for button click
+    lastPressedButton: ButtonType?, // Track which button was pressed
+    onButtonClick: (ButtonType) -> Unit // Callback for button click
 ) {
     when (uiState.instructionStep) {
         1 -> renderInstructionText("EJEMPLO 1")
@@ -146,6 +166,67 @@ private fun renderInstructions(
     }
 
     renderDynamicInstructionText(uiState.instructionStep)
+}
+
+@Composable
+private fun renderInstructionButtons(
+    uiState: DiscountUiState,
+    viewModel: DiscountViewModel,
+    currencyFormat: NumberFormat,
+    onButtonClick: (ButtonType) -> Unit // Callback for button click
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            onClick = {
+                onButtonClick(ButtonType.WIN_NOW) // Trigger the callback with button type
+                if (uiState.instructionStep == 1) {
+                    viewModel.updateInstructionStep(2)
+                }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("ahora")
+                    }
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Button(
+            onClick = {
+                onButtonClick(ButtonType.WIN_LATER) // Trigger the callback with button type
+                if (uiState.instructionStep == 2) {
+                    viewModel.updateInstructionStep(3)
+                }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("después")
+                    }
+                    append(" de ${uiState.rightButtonWaitTime}")
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
 }
 
 
@@ -360,67 +441,6 @@ private fun renderNextButton(uiState: DiscountUiState, showNextButton: Boolean, 
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun renderInstructionButtons(
-    uiState: DiscountUiState,
-    viewModel: DiscountViewModel,
-    currencyFormat: NumberFormat,
-    onButtonClick: () -> Unit // Callback for button click
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Button(
-            onClick = {
-                onButtonClick() // Trigger the callback
-                if (uiState.instructionStep == 1) {
-                    viewModel.updateInstructionStep(2)
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("ahora")
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Button(
-            onClick = {
-                onButtonClick() // Trigger the callback
-                if (uiState.instructionStep == 2) {
-                    viewModel.updateInstructionStep(3)
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("después")
-                    }
-                    append(" de ${uiState.rightButtonWaitTime}")
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
