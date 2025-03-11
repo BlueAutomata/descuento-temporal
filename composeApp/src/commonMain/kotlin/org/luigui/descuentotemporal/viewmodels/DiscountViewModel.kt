@@ -101,8 +101,19 @@ class DiscountViewModel : ViewModel() {
     private val userHome: String = System.getProperty("user.home")
     private val storageFile = File(userHome, "user_selected_folder.txt")
 
-    private val _showButtons = MutableStateFlow(true)
+    private val _showButtons = MutableStateFlow(false)
     val showButtons: StateFlow<Boolean> get() = _showButtons
+
+    private val _showContinueButton = MutableStateFlow(false)
+    val showContinueButton: StateFlow<Boolean> get() = _showContinueButton
+
+    fun dismissContinueButton() {
+        _showContinueButton.value = false
+    }
+
+    fun showContinueButton() {
+        _showContinueButton.value = true
+    }
 
     // Function to toggle button visibility
     fun toggleButtonsVisibility() {
@@ -180,6 +191,10 @@ class DiscountViewModel : ViewModel() {
 
     fun dismissInstructions() {
         _blockInstructions.value = false
+    }
+
+    fun showInstructions() {
+        _blockInstructions.value = true
     }
 
     private fun getDefaultFolderPath(): String {
@@ -361,4 +376,6 @@ class DiscountViewModel : ViewModel() {
         }
         workbook.close()
     }
+
+
 }

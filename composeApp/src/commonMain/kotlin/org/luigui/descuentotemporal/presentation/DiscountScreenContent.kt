@@ -62,9 +62,8 @@ fun DiscountScreenContent(
     // State for UI elements
     var showNextButton by remember { mutableStateOf(false) }
     var showLoading by remember { mutableStateOf(false) }
-    var showInstructionButtons by remember { mutableStateOf(true) } // State to control instruction buttons visibility
-    var showInstructionsContent by remember { mutableStateOf(true) } // State to control instructions content visibility
-    var lastPressedButton by remember { mutableStateOf<ButtonType?>(null) } // Track which button was pressed
+    val showContinuarButton = viewModel.showContinueButton.collectAsState().value
+    var lastPressedButton by remember { mutableStateOf<ButtonType?>(null) }
 
     // Currency formatting
     val currencyFormat = rememberCurrencyFormat()
@@ -85,13 +84,11 @@ fun DiscountScreenContent(
     // Handle button click and delay
     LaunchedEffect(showLoading) {
         if (showLoading) {
-            showInstructionButtons = false // Hide instruction buttons
-            showInstructionsContent = false // Hide instructions content
             delay(1000) // Delay for 1 second
             showLoading = false // Hide loading spinner
-            showInstructionButtons = true // Show instruction buttons again
-            showInstructionsContent = true // Show instructions content again
-            lastPressedButton = null // Reset the last pressed button
+            if (uiState.instructionStep == 3 && showContinuarButton) {
+                viewModel.showInstructions()
+            }
         }
     }
 
@@ -105,15 +102,14 @@ fun DiscountScreenContent(
             modifier = Modifier.padding(16.dp)
         ) {
             if (!showLoading) {
-                if (uiState.showInstructions && showInstructionsContent) { // Conditionally render instructions
-                    renderInstructions(uiState, viewModel, currencyFormat, showInstructionButtons, lastPressedButton) { buttonType ->
+                if (uiState.showInstructions) { // Conditionally render instructions
+                    renderInstructions(uiState, viewModel, currencyFormat, lastPressedButton) { buttonType ->
                         lastPressedButton = buttonType // Track which button was pressed
                         if (isCorrectButtonPressed(uiState.instructionStep, buttonType)) {
-                            showInstructionButtons = false // Hide instruction buttons
                             showLoading = true // Show loading spinner
                         }
                     }
-                } else {
+                } else if (!showContinuarButton) {
                     renderDiscountQuestion(uiState, viewModel, onNavigateToThankYou, currencyFormat)
                 }
             }
@@ -129,8 +125,11 @@ fun DiscountScreenContent(
 
         // Render other buttons only if loading is not active
         if (!showLoading) {
-            renderContinuarButton(uiState, viewModel)
-            renderNextButton(uiState, showNextButton, viewModel)
+            if (showNextButton) {
+                renderNextButton(uiState, showNextButton, viewModel)
+            } else if (showContinuarButton) {
+                renderContinueButton(uiState, viewModel)
+            }
         }
     }
 }
@@ -155,7 +154,6 @@ private fun renderInstructions(
     uiState: DiscountUiState,
     viewModel: DiscountViewModel,
     currencyFormat: NumberFormat,
-    showInstructionButtons: Boolean, // New parameter to control button visibility
     lastPressedButton: ButtonType?, // Track which button was pressed
     onButtonClick: (ButtonType) -> Unit // Callback for button click
 ) {
@@ -175,7 +173,8 @@ private fun renderInstructions(
         modifier = Modifier.padding(bottom = 16.dp)
     )
 
-    if (uiState.instructionStep != 3 && showInstructionButtons) {
+    // Show instruction buttons for steps 1 and 2
+    if (uiState.instructionStep in 1..2) {
         renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick)
     }
 
@@ -198,7 +197,9 @@ private fun renderInstructionButtons(
             onClick = {
                 onButtonClick(ButtonType.WIN_NOW) // Trigger the callback with button type
                 if (uiState.instructionStep == 1) {
-                    viewModel.updateInstructionStep(2)
+                    viewModel.updateInstructionStep(2) // Move to step 2
+                    viewModel.dismissInstructions()
+                    viewModel.showContinueButton()
                 }
             },
             modifier = Modifier
@@ -221,7 +222,9 @@ private fun renderInstructionButtons(
             onClick = {
                 onButtonClick(ButtonType.WIN_LATER) // Trigger the callback with button type
                 if (uiState.instructionStep == 2) {
-                    viewModel.updateInstructionStep(3)
+                    viewModel.updateInstructionStep(3) // Move to step 3
+                    viewModel.dismissInstructions()
+                    viewModel.showContinueButton()
                 }
             },
             modifier = Modifier
@@ -273,7 +276,8 @@ private fun renderChangeSituationText() {
         text = "CAMBO DE SITUACIÓN",
         style = MaterialTheme.typography.headlineMedium.copy(
             fontSize = 28.sp,
-            color = Color.Red
+            color = Color.Red,
+            fontWeight = FontWeight.Bold
         ),
         modifier = Modifier.padding(vertical = 8.dp),
         textAlign = TextAlign.Center
@@ -286,6 +290,7 @@ private fun renderChangeSituationText() {
         ),
         modifier = Modifier.padding(vertical = 8.dp),
         textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Bold
     )
 }
 
@@ -385,27 +390,49 @@ private fun renderDiscountQuestion(
 }
 
 @Composable
-private fun renderContinuarButton(uiState: DiscountUiState, viewModel: DiscountViewModel) {
-    if (uiState.showInstructions && uiState.instructionStep == 3) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.BottomEnd
+private fun renderContinueButton(uiState: DiscountUiState, viewModel: DiscountViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        if (uiState.instructionStep != 3) {
+            Text(
+                text = "¡Respuesta guardada!",
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Para continuar da click en siguiente.",
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Button(
+            onClick = {
+                if (uiState.instructionStep == 3) {
+                    viewModel.updateInstructionStep(1) // Reset to step 1
+                    viewModel.dismissInstructions() // Hide instructions
+                    viewModel.resetButtonsVisibility() // Reset button visibility
+                    viewModel.dismissContinueButton()
+                }
+                else {
+                    viewModel.showInstructions()
+                    viewModel.dismissContinueButton()
+                }
+            },
+            modifier = Modifier.padding(8.dp)
         ) {
-            Button(
-                onClick = {
-                    viewModel.updateInstructionStep(1)
-                    viewModel.dismissInstructions()
-                    viewModel.resetButtonsVisibility()
-                },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = TextContent.NextButtonText,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
-                )
-            }
+            Text(
+                text = TextContent.NextButtonText,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+            )
         }
     }
 }
