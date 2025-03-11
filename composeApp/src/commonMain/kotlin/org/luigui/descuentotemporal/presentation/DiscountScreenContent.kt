@@ -48,6 +48,8 @@ fun DiscountScreenContent(
     // State for UI elements
     var showNextButton by remember { mutableStateOf(false) }
     var showLoading by remember { mutableStateOf(false) }
+    var showInstructionButtons by remember { mutableStateOf(true) } // State to control instruction buttons visibility
+    var showInstructionsContent by remember { mutableStateOf(true) } // State to control instructions content visibility
 
     // Currency formatting
     val currencyFormat = rememberCurrencyFormat()
@@ -65,6 +67,18 @@ fun DiscountScreenContent(
         }
     }
 
+    // Handle button click and delay
+    LaunchedEffect(showLoading) {
+        if (showLoading) {
+            showInstructionButtons = false // Hide instruction buttons
+            showInstructionsContent = false // Hide instructions content
+            delay(1000) // Delay for 1 second
+            showLoading = false // Hide loading spinner
+            showInstructionButtons = true // Show instruction buttons again
+            showInstructionsContent = true // Show instructions content again
+        }
+    }
+
     // Main UI layout
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -74,18 +88,66 @@ fun DiscountScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            if (uiState.showInstructions) {
-                renderInstructions(uiState, viewModel, currencyFormat)
-            } else {
-                renderDiscountQuestion(uiState, viewModel, onNavigateToThankYou, currencyFormat)
+            if (!showLoading) {
+                if (uiState.showInstructions && showInstructionsContent) { // Conditionally render instructions
+                    renderInstructions(uiState, viewModel, currencyFormat, showInstructionButtons) {
+                        showInstructionButtons = false // Hide instruction buttons
+                        showLoading = true // Show loading spinner
+                    }
+                } else {
+                    renderDiscountQuestion(uiState, viewModel, onNavigateToThankYou, currencyFormat)
+                }
             }
+
         }
 
-        renderContinuarButton(uiState, viewModel)
-        renderLoadingSpinner(showLoading)
-        renderNextButton(uiState, showNextButton, viewModel)
+        // Render the loading spinner on top of the UI
+        if (showLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(50.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        // Render other buttons only if loading is not active
+        if (!showLoading) {
+            renderContinuarButton(uiState, viewModel)
+            renderNextButton(uiState, showNextButton, viewModel)
+        }
     }
 }
+
+@Composable
+private fun renderInstructions(
+    uiState: DiscountUiState,
+    viewModel: DiscountViewModel,
+    currencyFormat: NumberFormat,
+    showInstructionButtons: Boolean, // New parameter to control button visibility
+    onButtonClick: () -> Unit // Callback for button click
+) {
+    when (uiState.instructionStep) {
+        1 -> renderInstructionText("EJEMPLO 1")
+        2 -> renderInstructionText("EJEMPLO 2")
+        3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
+    }
+
+    if (uiState.currentBlock > 1) {
+        renderChangeSituationText()
+    }
+
+    Text(
+        text = formatTextWithStyles(TextContent.instructions[uiState.currentBlock] ?: ""),
+        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
+
+    if (uiState.instructionStep != 3 && showInstructionButtons) {
+        renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick)
+    }
+
+    renderDynamicInstructionText(uiState.instructionStep)
+}
+
 
 @Composable
 private fun collectUiState(viewModel: DiscountViewModel): DiscountUiState {
@@ -111,34 +173,6 @@ private fun rememberCurrencyFormat(): NumberFormat {
     }
 }
 
-@Composable
-private fun renderInstructions(
-    uiState: DiscountUiState,
-    viewModel: DiscountViewModel,
-    currencyFormat: NumberFormat
-) {
-    when (uiState.instructionStep) {
-        1 -> renderInstructionText("EJEMPLO 1")
-        2 -> renderInstructionText("EJEMPLO 2")
-        3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
-    }
-
-    if (uiState.currentBlock > 1) {
-        renderChangeSituationText()
-    }
-
-    Text(
-        text = formatTextWithStyles(TextContent.instructions[uiState.currentBlock] ?: ""),
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
-
-    if (uiState.instructionStep != 3) {
-        renderInstructionButtons(uiState, viewModel, currencyFormat)
-    }
-
-    renderDynamicInstructionText(uiState.instructionStep)
-}
 
 @Composable
 private fun renderInstructionText(text: String) {
@@ -170,64 +204,6 @@ private fun renderChangeSituationText() {
         modifier = Modifier.padding(vertical = 8.dp),
         textAlign = TextAlign.Center,
     )
-}
-
-@Composable
-private fun renderInstructionButtons(
-    uiState: DiscountUiState,
-    viewModel: DiscountViewModel,
-    currencyFormat: NumberFormat
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Button(
-            onClick = {
-                if (uiState.instructionStep == 1) {
-                    viewModel.updateInstructionStep(2)
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("ahora")
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Button(
-            onClick = {
-                if (uiState.instructionStep == 2) {
-                    viewModel.updateInstructionStep(3)
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("después")
-                    }
-                    append(" de ${uiState.rightButtonWaitTime}")
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 }
 
 @Composable
@@ -350,16 +326,6 @@ private fun renderContinuarButton(uiState: DiscountUiState, viewModel: DiscountV
 }
 
 @Composable
-private fun renderLoadingSpinner(showLoading: Boolean) {
-    if (showLoading) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-@Composable
 private fun renderNextButton(uiState: DiscountUiState, showNextButton: Boolean, viewModel: DiscountViewModel) {
     if (!uiState.showButtons && !uiState.showInstructions && showNextButton) {
         Column(
@@ -394,6 +360,67 @@ private fun renderNextButton(uiState: DiscountUiState, showNextButton: Boolean, 
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun renderInstructionButtons(
+    uiState: DiscountUiState,
+    viewModel: DiscountViewModel,
+    currencyFormat: NumberFormat,
+    onButtonClick: () -> Unit // Callback for button click
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            onClick = {
+                onButtonClick() // Trigger the callback
+                if (uiState.instructionStep == 1) {
+                    viewModel.updateInstructionStep(2)
+                }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("ahora")
+                    }
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Button(
+            onClick = {
+                onButtonClick() // Trigger the callback
+                if (uiState.instructionStep == 2) {
+                    viewModel.updateInstructionStep(3)
+                }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("después")
+                    }
+                    append(" de ${uiState.rightButtonWaitTime}")
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
