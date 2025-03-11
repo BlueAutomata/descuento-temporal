@@ -38,6 +38,20 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
+private fun collectUiState(viewModel: DiscountViewModel): DiscountUiState {
+    return DiscountUiState(
+        leftButtonValue = viewModel.leftButtonValue.collectAsState().value,
+        rightButtonValue = viewModel.rightButtonValue.collectAsState().value,
+        rightButtonWaitTime = viewModel.rightButtonWaitTime.collectAsState().value,
+        navigate = viewModel.navigateToThankYou.collectAsState().value,
+        currentBlock = viewModel.currentBlock.collectAsState().value,
+        showInstructions = viewModel.blockInstructions.collectAsState().value,
+        instructionStep = viewModel.instructionStep.collectAsState().value,
+        showButtons = viewModel.showButtons.collectAsState().value
+    )
+}
+
+@Composable
 fun DiscountScreenContent(
     viewModel: DiscountViewModel,
     onNavigateToThankYou: () -> Unit
@@ -59,7 +73,7 @@ fun DiscountScreenContent(
     LaunchedEffect(uiState.showButtons) {
         if (!uiState.showButtons && !uiState.showInstructions) {
             showLoading = true // Show loading spinner
-            delay(1000) // Delay for 1 second
+            delay(1500) // Delay for 1 second
             showLoading = false // Hide loading spinner
             showNextButton = true // Show Next button
         } else {
@@ -230,19 +244,7 @@ private fun renderInstructionButtons(
 }
 
 
-@Composable
-private fun collectUiState(viewModel: DiscountViewModel): DiscountUiState {
-    return DiscountUiState(
-        leftButtonValue = viewModel.leftButtonValue.collectAsState().value,
-        rightButtonValue = viewModel.rightButtonValue.collectAsState().value,
-        rightButtonWaitTime = viewModel.rightButtonWaitTime.collectAsState().value,
-        navigate = viewModel.navigateToThankYou.collectAsState().value,
-        currentBlock = viewModel.currentBlock.collectAsState().value,
-        showInstructions = viewModel.blockInstructions.collectAsState().value,
-        instructionStep = viewModel.instructionStep.collectAsState().value,
-        showButtons = viewModel.showButtons.collectAsState().value
-    )
-}
+
 
 @Composable
 private fun rememberCurrencyFormat(): NumberFormat {
@@ -333,6 +335,7 @@ private fun renderDiscountQuestion(
                     } else {
                         viewModel.onLeftButtonClick()
                         viewModel.toggleButtonsVisibility()
+                        print(uiState.toString())
                     }
                 },
                 modifier = Modifier
@@ -358,6 +361,7 @@ private fun renderDiscountQuestion(
                     } else {
                         viewModel.onRightButtonClick()
                         viewModel.toggleButtonsVisibility()
+                        print(uiState.toString())
                     }
                 },
                 modifier = Modifier

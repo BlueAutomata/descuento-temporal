@@ -212,6 +212,7 @@ class DiscountViewModel : ViewModel() {
             } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
                 _blockInstructions.value = true // Show block instructions
+                print(blockInstructions.value)
             }
         } else {
             if (current.trial < PREDEFINED_VALUES.size) { // Use size - 1 to avoid index out of bounds
@@ -259,6 +260,7 @@ class DiscountViewModel : ViewModel() {
             } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
                 _blockInstructions.value = true // Show block instructions
+                print(blockInstructions.value)
             }
         } else {
             if (current.trial < PREDEFINED_VALUES.size) { // Use size - 1 to avoid index out of bounds
