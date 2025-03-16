@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -61,34 +63,18 @@ fun DiscountScreenContent(
 
     // State for UI elements
     var showNextButton by remember { mutableStateOf(false) }
-    var showLoading by remember { mutableStateOf(false) }
     val showContinuarButton = viewModel.showContinueButton.collectAsState().value
     var lastPressedButton by remember { mutableStateOf<ButtonType?>(null) }
 
     // Currency formatting
     val currencyFormat = rememberCurrencyFormat()
 
-    // Handle loading and next button visibility
+    // Handle next button visibility
     LaunchedEffect(uiState.showButtons) {
         if (!uiState.showButtons && !uiState.showInstructions) {
-            showLoading = true // Show loading spinner
-            delay(1500) // Delay for 1 second
-            showLoading = false // Hide loading spinner
             showNextButton = true // Show Next button
         } else {
             showNextButton = false
-            showLoading = false
-        }
-    }
-
-    // Handle button click and delay
-    LaunchedEffect(showLoading) {
-        if (showLoading) {
-            delay(1000) // Delay for 1 second
-            showLoading = false // Hide loading spinner
-            if (uiState.instructionStep == 3 && showContinuarButton) {
-                viewModel.showInstructions()
-            }
         }
     }
 
@@ -101,35 +87,20 @@ fun DiscountScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            if (!showLoading) {
-                if (uiState.showInstructions) { // Conditionally render instructions
-                    renderInstructions(uiState, viewModel, currencyFormat, lastPressedButton) { buttonType ->
-                        lastPressedButton = buttonType // Track which button was pressed
-                        if (isCorrectButtonPressed(uiState.instructionStep, buttonType)) {
-                            showLoading = true // Show loading spinner
-                        }
-                    }
-                } else if (!showContinuarButton) {
-                    renderDiscountQuestion(uiState, viewModel, onNavigateToThankYou, currencyFormat)
+            print("Show instructions ${uiState.showInstructions}")
+            if (uiState.showInstructions) { // Conditionally render instructions
+                renderInstructions(uiState, viewModel, currencyFormat, lastPressedButton) { buttonType ->
+                    lastPressedButton = buttonType // Track which button was pressed
                 }
+            } else if (!showContinuarButton) {
+                renderDiscountQuestion(uiState, viewModel, onNavigateToThankYou, currencyFormat)
             }
         }
 
-        // Render the loading spinner on top of the UI
-        if (showLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(50.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        // Render other buttons only if loading is not active
-        if (!showLoading) {
-            if (showNextButton) {
-                renderNextButton(uiState, showNextButton, viewModel)
-            } else if (showContinuarButton) {
-                renderContinueButton(uiState, viewModel)
-            }
+        if (showNextButton) {
+            renderNextButton(uiState, showNextButton, viewModel)
+        } else if (showContinuarButton) {
+            renderContinueButton(uiState, viewModel)
         }
     }
 }
@@ -175,10 +146,16 @@ private fun renderInstructions(
 
     // Show instruction buttons for steps 1 and 2
     if (uiState.instructionStep in 1..2) {
-        renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick)
+        renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick, uiState.instructionStep)
     }
-
-    renderDynamicInstructionText(uiState.instructionStep)
+    else {
+        Text(
+            text = "¡Bien hecho! Presiona Siguiente para seguir.",
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+    }
+    // renderDynamicInstructionText(uiState.instructionStep)
 }
 
 @Composable
@@ -186,68 +163,113 @@ private fun renderInstructionButtons(
     uiState: DiscountUiState,
     viewModel: DiscountViewModel,
     currencyFormat: NumberFormat,
-    onButtonClick: (ButtonType) -> Unit // Callback for button click
+    onButtonClick: (ButtonType) -> Unit,
+    instructionStep: Int
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Button(
-            onClick = {
-                onButtonClick(ButtonType.WIN_NOW) // Trigger the callback with button type
-                if (uiState.instructionStep == 1) {
-                    viewModel.updateInstructionStep(2) // Move to step 2
-                    viewModel.dismissInstructions()
-                    viewModel.showContinueButton()
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)
+        // Buttons Row
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("ahora")
+            // Left Button (Win Now)
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = {
+                            onButtonClick(ButtonType.WIN_NOW) // Trigger the callback with button type
+                            if (uiState.instructionStep == 1) {
+                                viewModel.updateInstructionStep(2) // Move to step 2
+                                viewModel.dismissInstructions()
+                                viewModel.showContinueButton()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp)
+                    ) {
+                        Text(
+                            text = buildAnnotatedString {
+                                append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("ahora")
+                                }
+                            },
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                            textAlign = TextAlign.Center
+                        )
                     }
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                textAlign = TextAlign.Center
-            )
-        }
 
-        Button(
-            onClick = {
-                onButtonClick(ButtonType.WIN_LATER) // Trigger the callback with button type
-                if (uiState.instructionStep == 2) {
-                    viewModel.updateInstructionStep(3) // Move to step 3
-                    viewModel.dismissInstructions()
-                    viewModel.showContinueButton()
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp)
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("después")
+                    // Text below the left button (for "now") or Spacer to maintain position
+                    if (instructionStep == 1) {
+                        Text(
+                            text = "Presiona el botón de ganar ahora.",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
                     }
-                    append(" de ${uiState.rightButtonWaitTime}")
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                textAlign = TextAlign.Center
-            )
+                }
+            }
+
+            // Right Button (Win Later)
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = {
+                            onButtonClick(ButtonType.WIN_LATER) // Trigger the callback with button type
+                            if (uiState.instructionStep == 2) {
+                                viewModel.updateInstructionStep(3) // Move to step 3
+                                viewModel.showContinueButton()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp)
+                    ) {
+                        Text(
+                            text = buildAnnotatedString {
+                                append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("después")
+                                }
+                                append(" de ${uiState.rightButtonWaitTime}")
+                            },
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    // Text below the right button (for "after") or Spacer to maintain position
+                    if (instructionStep == 2) {
+                        Text(
+                            text = "Presiona el botón de ganar después.",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
+                    }
+                }
+            }
         }
     }
 }
-
-
-
 
 @Composable
 private fun rememberCurrencyFormat(): NumberFormat {
@@ -258,7 +280,6 @@ private fun rememberCurrencyFormat(): NumberFormat {
         }
     }
 }
-
 
 @Composable
 private fun renderInstructionText(text: String) {
@@ -273,20 +294,10 @@ private fun renderInstructionText(text: String) {
 @Composable
 private fun renderChangeSituationText() {
     Text(
-        text = "CAMBO DE SITUACIÓN",
-        style = MaterialTheme.typography.headlineMedium.copy(
-            fontSize = 28.sp,
-            color = Color.Red,
-            fontWeight = FontWeight.Bold
-        ),
-        modifier = Modifier.padding(vertical = 8.dp),
-        textAlign = TextAlign.Center
-    )
-    Text(
         text = "Por favor lee atentamente las siguientes instrucciones:",
         style = MaterialTheme.typography.headlineSmall.copy(
             fontSize = 26.sp,
-            color = Color.Red
+            color = Color.Green
         ),
         modifier = Modifier.padding(vertical = 8.dp),
         textAlign = TextAlign.Center,
@@ -308,7 +319,7 @@ private fun renderDynamicInstructionText(instructionStep: Int) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
         3 -> Text(
-            text = "¡Bien hecho! Presiona Continuar para seguir.",
+            text = "¡Bien hecho! Presiona Siguiente para seguir.",
             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
             modifier = Modifier.padding(bottom = 16.dp)
         )
