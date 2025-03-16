@@ -12,7 +12,7 @@ class InstructionScreen(private val viewModel: DiscountViewModel): Screen {
         val navigator = LocalNavigator.current
 
         InstructionScreenContent {
-            navigator?.push(ExperimentStartScreen(viewModel))
+            navigator?.push(GeneralInstructionScreen(viewModel))
         }
     }
 }

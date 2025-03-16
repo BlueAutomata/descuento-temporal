@@ -106,5 +106,17 @@ object TextContent {
         6 to "Imagina que hoy debes elegir entre **GANAR** una **cantidad menor de dinero entregada AHORA** y otra **cantidad mayor de dinero entregada después de _6 AÑOS_**. La cantidad a ganar será totalmente segura y no habrá impedimentos para obtenerla. En la alternativa demorada, solo debes esperar el tiempo indicado para obtener la recompensa. Elige la opción de tu preferencia.\n\n**Responde cada elección en el orden en el que aparecen. No saltes elecciones.**"
     )
 
-    val startExperiment = "Comienza el experimento."
+    val generalInstructionTitle = "Instrucciones Generales."
+
+    val generalInstructionText = """
+    Antes de comenzar el estudio, se te mostrarán dos ejemplos de elección entre: 
+
+    1. Una alternativa monetaria que puedes recibir de inmediato. 
+
+    2. Otra alternativa monetaria que puedes elegir si decides esperar un tiempo. 
+
+    Después de estas elecciones de prueba, iniciarás el estudio de elección monetaria. En cada decisión, los valores monetarios cambiarán, y podrás observar estos cambios una vez que presiones el botón "Siguiente" y tu respuesta haya sido registrada. 
+
+    Te recomendamos prestar atención a estos cambios para tomar decisiones informadas.
+""".trimIndent()
 }

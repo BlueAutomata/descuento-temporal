@@ -34,8 +34,15 @@ fun ExperimentStartScreenContent(
         ) {
             // Consent heading
             Text(
-                text = TextContent.startExperiment,
+                text = TextContent.generalInstructionTitle,
                 style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp), // Increase font size
+                modifier = Modifier.padding(vertical = 8.dp) // Add some vertical spacing
+            )
+
+            // Additional text
+            Text(
+                text = TextContent.generalInstructionText,
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp), // Increase font size
                 modifier = Modifier.padding(vertical = 8.dp) // Add some vertical spacing
             )
 
