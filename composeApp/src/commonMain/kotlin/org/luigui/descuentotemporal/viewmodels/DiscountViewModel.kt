@@ -101,8 +101,19 @@ class DiscountViewModel : ViewModel() {
     private val userHome: String = System.getProperty("user.home")
     private val storageFile = File(userHome, "user_selected_folder.txt")
 
-    private val _showButtons = MutableStateFlow(true)
+    private val _showButtons = MutableStateFlow(false)
     val showButtons: StateFlow<Boolean> get() = _showButtons
+
+    private val _showContinueButton = MutableStateFlow(false)
+    val showContinueButton: StateFlow<Boolean> get() = _showContinueButton
+
+    fun dismissContinueButton() {
+        _showContinueButton.value = false
+    }
+
+    fun showContinueButton() {
+        _showContinueButton.value = true
+    }
 
     // Function to toggle button visibility
     fun toggleButtonsVisibility() {
@@ -182,6 +193,10 @@ class DiscountViewModel : ViewModel() {
         _blockInstructions.value = false
     }
 
+    fun showInstructions() {
+        _blockInstructions.value = true
+    }
+
     private fun getDefaultFolderPath(): String {
         return File(System.getProperty("user.home"), "Documents").absolutePath
     }
@@ -212,6 +227,7 @@ class DiscountViewModel : ViewModel() {
             } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
                 _blockInstructions.value = true // Show block instructions
+                print(blockInstructions.value)
             }
         } else {
             if (current.trial < PREDEFINED_VALUES.size) { // Use size - 1 to avoid index out of bounds
@@ -259,6 +275,7 @@ class DiscountViewModel : ViewModel() {
             } else {
                 _rightButtonWaitTime.value = WAITING_VALUES[block - 1]
                 _blockInstructions.value = true // Show block instructions
+                print(blockInstructions.value)
             }
         } else {
             if (current.trial < PREDEFINED_VALUES.size) { // Use size - 1 to avoid index out of bounds
@@ -359,4 +376,6 @@ class DiscountViewModel : ViewModel() {
         }
         workbook.close()
     }
+
+
 }
