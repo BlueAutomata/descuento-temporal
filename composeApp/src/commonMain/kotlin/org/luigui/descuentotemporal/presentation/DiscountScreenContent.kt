@@ -1,6 +1,10 @@
 package org.luigui.descuentotemporal.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -133,15 +138,18 @@ private fun renderInstructions(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Render instruction text based on the current step
-        when (uiState.instructionStep) {
-            1 -> renderInstructionText("EJEMPLO 1")
-            2 -> renderInstructionText("EJEMPLO 2")
-            3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
+        Crossfade(
+            targetState = uiState.instructionStep,
+        ) { step ->
+            when (step) {
+                1 -> renderInstructionText("EJEMPLO 1")
+                2 -> renderInstructionText("EJEMPLO 2")
+                3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
+                else -> {} // Handle unexpected states
+            }
         }
 
         // Render change situation text if applicable
@@ -229,18 +237,30 @@ private fun renderInstructionButtons(
             // Instructional Text or Spacer
             when (instructionStep) {
                 1 -> {
-                    Text(
-                        text = "Presiona el botón de ganar ahora.",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(
+                            text = "Presiona el botón de ganar ahora.",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
                 2 -> {
-                    Text(
-                        text = "Presiona el botón de ganar después.",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Text(
+                            text = "Presiona el botón de ganar después.",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                 }
                 else -> {
                     Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
@@ -299,8 +319,7 @@ private fun renderInstructionText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
-        modifier = Modifier.padding(vertical = 8.dp),
-        textAlign = TextAlign.Center
+        modifier = Modifier.padding(bottom = 16.dp)
     )
 }
 

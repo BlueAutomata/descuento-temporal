@@ -26,6 +26,7 @@ lifecycleLivedataCoreKtx = "2.8.7"
 activityKtx = "1.10.0"
 lifecycleViewmodelAndroid = "2.8.7"
 coreI18n = "1.0.0-alpha01"
+animationAndroid = "1.7.8"
 
 [libraries]
 compose-file-picker = { module = "com.github.AdityaAnand1:compose-file-picker", version.ref = "composeFilePicker" }
@@ -56,6 +57,7 @@ androidx-lifecycle-livedata-core-ktx = { group = "androidx.lifecycle", name = "l
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 androidx-lifecycle-viewmodel-android = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-android", version.ref = "lifecycleViewmodelAndroid" }
 androidx-core-i18n = { group = "androidx.core", name = "core-i18n", version.ref = "coreI18n" }
+androidx-animation-android = { group = "androidx.compose.animation", name = "animation-android", version.ref = "animationAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
