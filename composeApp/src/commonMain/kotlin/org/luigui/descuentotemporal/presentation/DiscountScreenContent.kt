@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +31,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 import org.luigui.descuentotemporal.texts.TextContent
 import org.luigui.descuentotemporal.viewmodels.DiscountViewModel
 import java.text.NumberFormat
@@ -303,27 +300,6 @@ private fun renderChangeSituationText() {
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold
     )
-}
-
-@Composable
-private fun renderDynamicInstructionText(instructionStep: Int) {
-    when (instructionStep) {
-        1 -> Text(
-            text = "Por favor, presiona el botón de ganar ahora.",
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        2 -> Text(
-            text = "Ahora, presiona el botón de ganar después.",
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        3 -> Text(
-            text = "¡Bien hecho! Presiona Siguiente para seguir.",
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-    }
 }
 
 @Composable
