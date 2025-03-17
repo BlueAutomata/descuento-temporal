@@ -1,5 +1,6 @@
 package org.luigui.descuentotemporal.presentation
 
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -315,9 +316,10 @@ private fun renderDiscountQuestion(
 ) {
     if (uiState.showButtons) {
         var selectedIndex by remember { mutableStateOf(-1) }
+        val animatedLeftValue by animateIntAsState(targetValue = uiState.leftButtonValue.toInt())
         val options = listOf(
             buildAnnotatedString {
-                append("Ganar ${currencyFormat.format(uiState.leftButtonValue)} ")
+                append("Ganar ${currencyFormat.format(animatedLeftValue)} ")
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("ahora")
                 }
