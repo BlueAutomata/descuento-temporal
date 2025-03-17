@@ -130,34 +130,43 @@ private fun renderInstructions(
     lastPressedButton: ButtonType?, // Track which button was pressed
     onButtonClick: (ButtonType) -> Unit // Callback for button click
 ) {
-    when (uiState.instructionStep) {
-        1 -> renderInstructionText("EJEMPLO 1")
-        2 -> renderInstructionText("EJEMPLO 2")
-        3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
-    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Render instruction text based on the current step
+        when (uiState.instructionStep) {
+            1 -> renderInstructionText("EJEMPLO 1")
+            2 -> renderInstructionText("EJEMPLO 2")
+            3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
+        }
 
-    if (uiState.currentBlock > 1) {
-        renderChangeSituationText()
-    }
+        // Render change situation text if applicable
+        if (uiState.currentBlock > 1) {
+            renderChangeSituationText()
+        }
 
-    Text(
-        text = formatTextWithStyles(TextContent.instructions[uiState.currentBlock] ?: ""),
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
-
-    // Show instruction buttons for steps 1 and 2
-    if (uiState.instructionStep in 1..2) {
-        renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick, uiState.instructionStep)
-    }
-    else {
+        // Render main instruction text
         Text(
-            text = "¡Bien hecho! Presiona Siguiente para seguir.",
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+            text = formatTextWithStyles(TextContent.instructions[uiState.currentBlock] ?: ""),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
             modifier = Modifier.padding(bottom = 16.dp)
         )
+
+        // Show instruction buttons for steps 1 and 2
+        if (uiState.instructionStep in 1..2) {
+            renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick, uiState.instructionStep)
+        } else {
+            Text(
+                text = "¡Bien hecho! Presiona Siguiente para seguir.",
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
     }
-    // renderDynamicInstructionText(uiState.instructionStep)
 }
 
 @Composable
@@ -168,106 +177,108 @@ private fun renderInstructionButtons(
     onButtonClick: (ButtonType) -> Unit,
     instructionStep: Int
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Buttons Row
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Left Button (Win Now)
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = {
-                            onButtonClick(ButtonType.WIN_NOW) // Trigger the callback with button type
-                            if (uiState.instructionStep == 1) {
-                                viewModel.updateInstructionStep(2) // Move to step 2
-                                viewModel.dismissInstructions()
-                                viewModel.showContinueButton()
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("ahora")
-                                }
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    val options = listOf(
+        buildAnnotatedString {
+            append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("ahora")
+            }
+        },
+        buildAnnotatedString {
+            append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("después")
+            }
+            append(" de ${uiState.rightButtonWaitTime}")
+        }
+    )
 
-                    // Text below the left button (for "now") or Spacer to maintain position
-                    if (instructionStep == 1) {
-                        Text(
-                            text = "Presiona el botón de ganar ahora.",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
-                    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally
+        ) {
+            // SingleChoiceSegmentedButtonRow
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth() // Fill the available width
+            ) {
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size
+                        ),
+                        onClick = {
+                            selectedIndex = index
+                        },
+                        selected = index == selectedIndex,
+                        modifier = Modifier.weight(1f),
+                        label = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                            )
+                        }
+                    )
                 }
             }
 
-            // Right Button (Win Later)
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = {
-                            onButtonClick(ButtonType.WIN_LATER) // Trigger the callback with button type
+            // Instructional Text or Spacer
+            when (instructionStep) {
+                1 -> {
+                    Text(
+                        text = "Presiona el botón de ganar ahora.",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                2 -> {
+                    Text(
+                        text = "Presiona el botón de ganar después.",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                else -> {
+                    Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
+                }
+            }
+        }
+
+        // "Next" Button (appears only if a segmented button is selected)
+        if (selectedIndex >= 0 && uiState.instructionStep == selectedIndex + 1) {
+            Button(
+                onClick = {
+                    when (selectedIndex) {
+                        0 -> {
+                            // Handle "Win Now" logic
+                            onButtonClick(ButtonType.WIN_NOW)
+                            if (uiState.instructionStep == 1) {
+                                viewModel.updateInstructionStep(2)
+                            }
+                        }
+                        1 -> {
+                            // Handle "Win Later" logic
+                            onButtonClick(ButtonType.WIN_LATER)
                             if (uiState.instructionStep == 2) {
-                                viewModel.updateInstructionStep(3) // Move to step 3
+                                viewModel.updateInstructionStep(3)
                                 viewModel.showContinueButton()
                             }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 8.dp)
-                    ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("después")
-                                }
-                                append(" de ${uiState.rightButtonWaitTime}")
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            textAlign = TextAlign.Center
-                        )
+                        }
                     }
-
-                    // Text below the right button (for "after") or Spacer to maintain position
-                    if (instructionStep == 2) {
-                        Text(
-                            text = "Presiona el botón de ganar después.",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
-                    }
-                }
+                    selectedIndex = -1 // Reset the selected index
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd) // Align to the bottom-right corner
+                    .padding(16.dp) // Add some padding
+            ) {
+                Text(
+                    text = TextContent.NextButtonText,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                )
             }
         }
     }
