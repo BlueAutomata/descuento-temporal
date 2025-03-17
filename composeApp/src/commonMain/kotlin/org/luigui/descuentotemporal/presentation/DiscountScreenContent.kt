@@ -11,11 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -310,67 +314,80 @@ private fun renderDiscountQuestion(
     currencyFormat: NumberFormat
 ) {
     if (uiState.showButtons) {
-        Text(
-            text = TextContent.DiscountQuestion,
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
-            modifier = Modifier.padding(bottom = 16.dp)
+        var selectedIndex by remember { mutableStateOf(-1) }
+        val options = listOf(
+            buildAnnotatedString {
+                append("Ganar ${currencyFormat.format(uiState.leftButtonValue)} ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("ahora")
+                }
+            },
+            buildAnnotatedString {
+                append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("después")
+                }
+                append(" de ${uiState.rightButtonWaitTime}")
+            }
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                onClick = {
-                    if (uiState.navigate) {
-                        onNavigateToThankYou()
-                    } else {
-                        viewModel.onLeftButtonClick()
-                        viewModel.toggleButtonsVisibility()
-                        print(uiState.toString())
-                    }
-                },
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                // Add a spacer to push content to the center vertically
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = buildAnnotatedString {
-                        append("Ganar ${currencyFormat.format(uiState.leftButtonValue)} ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("ahora")
-                        }
-                    },
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                    textAlign = TextAlign.Center
+                    text = TextContent.DiscountQuestion,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
+
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth(),
+
+                ) {
+                    options.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = options.size
+                            ),
+                            onClick = { selectedIndex = index },
+                            selected = index == selectedIndex,
+                            label = { Text(label, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)) }
+                        )
+                    }
+                }
+
+                // Add another spacer to balance the vertical centering
+                Spacer(modifier = Modifier.weight(1f))
             }
 
-            Button(
-                onClick = {
-                    if (uiState.navigate) {
-                        onNavigateToThankYou()
-                    } else {
-                        viewModel.onRightButtonClick()
-                        viewModel.toggleButtonsVisibility()
-                        print(uiState.toString())
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("después")
+            // Place the "Next" button in the bottom-right corner
+            if (selectedIndex >= 0) {
+                Button(
+                    onClick = {
+                        if (uiState.navigate) {
+                            onNavigateToThankYou()
+                        } else if (selectedIndex == 0) {
+                            viewModel.onLeftButtonClick()
+                        } else if (selectedIndex == 1) {
+                            viewModel.onRightButtonClick()
                         }
-                        append(" de ${uiState.rightButtonWaitTime}")
+                        selectedIndex = -1
                     },
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                    textAlign = TextAlign.Center
-                )
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd) // Align to the bottom-right corner
+                        .padding(16.dp) // Add some padding
+                ) {
+                    Text(
+                        text = TextContent.NextButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                    )
+                }
             }
         }
     }
