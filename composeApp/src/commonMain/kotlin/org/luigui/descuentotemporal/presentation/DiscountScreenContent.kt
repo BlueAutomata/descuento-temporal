@@ -1,5 +1,10 @@
 package org.luigui.descuentotemporal.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,13 +14,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,34 +135,46 @@ private fun renderInstructions(
     lastPressedButton: ButtonType?, // Track which button was pressed
     onButtonClick: (ButtonType) -> Unit // Callback for button click
 ) {
-    when (uiState.instructionStep) {
-        1 -> renderInstructionText("EJEMPLO 1")
-        2 -> renderInstructionText("EJEMPLO 2")
-        3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
-    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Crossfade(
+            targetState = uiState.instructionStep,
+        ) { step ->
+            when (step) {
+                1 -> renderInstructionText("EJEMPLO 1")
+                2 -> renderInstructionText("EJEMPLO 2")
+                3 -> renderInstructionText("DECISIONES DE SALUD Y DESCUENTO TEMPORAL EN PACIENTES CON PRE DIABETES Y DIABETES TIPO 2")
+                else -> {} // Handle unexpected states
+            }
+        }
 
-    if (uiState.currentBlock > 1) {
-        renderChangeSituationText()
-    }
+        // Render change situation text if applicable
+        if (uiState.currentBlock > 1) {
+            renderChangeSituationText()
+        }
 
-    Text(
-        text = formatTextWithStyles(TextContent.instructions[uiState.currentBlock] ?: ""),
-        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
-
-    // Show instruction buttons for steps 1 and 2
-    if (uiState.instructionStep in 1..2) {
-        renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick, uiState.instructionStep)
-    }
-    else {
+        // Render main instruction text
         Text(
-            text = "¡Bien hecho! Presiona Siguiente para seguir.",
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+            text = formatTextWithStyles(TextContent.instructions[uiState.currentBlock] ?: ""),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
             modifier = Modifier.padding(bottom = 16.dp)
         )
+
+        // Show instruction buttons for steps 1 and 2
+        if (uiState.instructionStep in 1..2) {
+            renderInstructionButtons(uiState, viewModel, currencyFormat, onButtonClick, uiState.instructionStep)
+        } else {
+            Text(
+                text = "¡Bien hecho! Presiona Siguiente para seguir.",
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
     }
-    // renderDynamicInstructionText(uiState.instructionStep)
 }
 
 @Composable
@@ -163,106 +185,120 @@ private fun renderInstructionButtons(
     onButtonClick: (ButtonType) -> Unit,
     instructionStep: Int
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Buttons Row
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Left Button (Win Now)
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = {
-                            onButtonClick(ButtonType.WIN_NOW) // Trigger the callback with button type
-                            if (uiState.instructionStep == 1) {
-                                viewModel.updateInstructionStep(2) // Move to step 2
-                                viewModel.dismissInstructions()
-                                viewModel.showContinueButton()
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("ahora")
-                                }
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+    var selectedIndex by remember { mutableStateOf(-1) }
+    val options = listOf(
+        buildAnnotatedString {
+            append("Ganar ${currencyFormat.format(viewModel.updateExampleValue(block_num = uiState.currentBlock))} ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("ahora")
+            }
+        },
+        buildAnnotatedString {
+            append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("después")
+            }
+            append(" de ${uiState.rightButtonWaitTime}")
+        }
+    )
 
-                    // Text below the left button (for "now") or Spacer to maintain position
-                    if (instructionStep == 1) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally
+        ) {
+            // SingleChoiceSegmentedButtonRow
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth() // Fill the available width
+            ) {
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size
+                        ),
+                        onClick = {
+                            selectedIndex = index
+                        },
+                        selected = index == selectedIndex,
+                        modifier = Modifier.weight(1f),
+                        label = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                            )
+                        }
+                    )
+                }
+            }
+
+            // Instructional Text or Spacer
+            when (instructionStep) {
+                1 -> {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
                         Text(
                             text = "Presiona el botón de ganar ahora.",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                    } else {
-                        Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
                     }
                 }
-            }
-
-            // Right Button (Win Later)
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = {
-                            onButtonClick(ButtonType.WIN_LATER) // Trigger the callback with button type
-                            if (uiState.instructionStep == 2) {
-                                viewModel.updateInstructionStep(3) // Move to step 3
-                                viewModel.showContinueButton()
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 8.dp)
+                2 -> {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(),
+                        exit = fadeOut()
                     ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("después")
-                                }
-                                append(" de ${uiState.rightButtonWaitTime}")
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    // Text below the right button (for "after") or Spacer to maintain position
-                    if (instructionStep == 2) {
                         Text(
                             text = "Presiona el botón de ganar después.",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp),
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                    } else {
-                        Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
                     }
                 }
+                else -> {
+                    Spacer(modifier = Modifier.height(32.dp)) // Fixed height to match text height
+                }
+            }
+        }
+
+        // "Next" Button (appears only if a segmented button is selected)
+        if (selectedIndex >= 0 && uiState.instructionStep == selectedIndex + 1) {
+            Button(
+                onClick = {
+                    when (selectedIndex) {
+                        0 -> {
+                            // Handle "Win Now" logic
+                            onButtonClick(ButtonType.WIN_NOW)
+                            if (uiState.instructionStep == 1) {
+                                viewModel.updateInstructionStep(2)
+                            }
+                        }
+                        1 -> {
+                            // Handle "Win Later" logic
+                            onButtonClick(ButtonType.WIN_LATER)
+                            if (uiState.instructionStep == 2) {
+                                viewModel.updateInstructionStep(3)
+                                viewModel.showContinueButton()
+                            }
+                        }
+                    }
+                    selectedIndex = -1 // Reset the selected index
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd) // Align to the bottom-right corner
+                    .padding(16.dp) // Add some padding
+            ) {
+                Text(
+                    text = TextContent.NextButtonText,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                )
             }
         }
     }
@@ -283,8 +319,7 @@ private fun renderInstructionText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.headlineLarge.copy(fontSize = 30.sp),
-        modifier = Modifier.padding(vertical = 8.dp),
-        textAlign = TextAlign.Center
+        modifier = Modifier.padding(bottom = 16.dp)
     )
 }
 
@@ -294,7 +329,7 @@ private fun renderChangeSituationText() {
         text = "Por favor lee atentamente las siguientes instrucciones:",
         style = MaterialTheme.typography.headlineSmall.copy(
             fontSize = 26.sp,
-            color = Color.Green
+            color = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.padding(vertical = 8.dp),
         textAlign = TextAlign.Center,
@@ -310,67 +345,81 @@ private fun renderDiscountQuestion(
     currencyFormat: NumberFormat
 ) {
     if (uiState.showButtons) {
-        Text(
-            text = TextContent.DiscountQuestion,
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
-            modifier = Modifier.padding(bottom = 16.dp)
+        var selectedIndex by remember { mutableStateOf(-1) }
+        val animatedLeftValue by animateIntAsState(targetValue = uiState.leftButtonValue.toInt())
+        val options = listOf(
+            buildAnnotatedString {
+                append("Ganar ${currencyFormat.format(animatedLeftValue)} ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("ahora")
+                }
+            },
+            buildAnnotatedString {
+                append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("después")
+                }
+                append(" de ${uiState.rightButtonWaitTime}")
+            }
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(
-                onClick = {
-                    if (uiState.navigate) {
-                        onNavigateToThankYou()
-                    } else {
-                        viewModel.onLeftButtonClick()
-                        viewModel.toggleButtonsVisibility()
-                        print(uiState.toString())
-                    }
-                },
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                // Add a spacer to push content to the center vertically
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = buildAnnotatedString {
-                        append("Ganar ${currencyFormat.format(uiState.leftButtonValue)} ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("ahora")
-                        }
-                    },
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                    textAlign = TextAlign.Center
+                    text = TextContent.DiscountQuestion,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
+
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth(),
+
+                ) {
+                    options.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = options.size
+                            ),
+                            onClick = { selectedIndex = index },
+                            selected = index == selectedIndex,
+                            label = { Text(label, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)) }
+                        )
+                    }
+                }
+
+                // Add another spacer to balance the vertical centering
+                Spacer(modifier = Modifier.weight(1f))
             }
 
-            Button(
-                onClick = {
-                    if (uiState.navigate) {
-                        onNavigateToThankYou()
-                    } else {
-                        viewModel.onRightButtonClick()
-                        viewModel.toggleButtonsVisibility()
-                        print(uiState.toString())
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        append("Ganar ${currencyFormat.format(uiState.rightButtonValue)} ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("después")
+            // Place the "Next" button in the bottom-right corner
+            if (selectedIndex >= 0) {
+                Button(
+                    onClick = {
+                        if (uiState.navigate) {
+                            onNavigateToThankYou()
+                        } else if (selectedIndex == 0) {
+                            viewModel.onLeftButtonClick()
+                        } else if (selectedIndex == 1) {
+                            viewModel.onRightButtonClick()
                         }
-                        append(" de ${uiState.rightButtonWaitTime}")
+                        selectedIndex = -1
                     },
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                    textAlign = TextAlign.Center
-                )
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd) // Align to the bottom-right corner
+                        .padding(16.dp) // Add some padding
+                ) {
+                    Text(
+                        text = TextContent.NextButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                    )
+                }
             }
         }
     }

@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.android)
     implementation(libs.androidx.core.i18n)
+    implementation(libs.androidx.animation.android)
     debugImplementation(compose.uiTooling)
 }
 
@@ -96,7 +97,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
-            packageName = "Descuento Temporal"
+            packageName = "Descuento Temporal Final"
             packageVersion = "1.0.0"
         }
     }
