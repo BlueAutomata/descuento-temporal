@@ -329,7 +329,7 @@ private fun renderChangeSituationText() {
         text = "Por favor lee atentamente las siguientes instrucciones:",
         style = MaterialTheme.typography.headlineSmall.copy(
             fontSize = 26.sp,
-            color = Color.Green
+            color = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.padding(vertical = 8.dp),
         textAlign = TextAlign.Center,

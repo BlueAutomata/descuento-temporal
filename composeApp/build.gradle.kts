@@ -97,7 +97,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
-            packageName = "Descuento Temporal"
+            packageName = "Descuento Temporal Final"
             packageVersion = "1.0.0"
         }
     }

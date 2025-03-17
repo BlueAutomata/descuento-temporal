@@ -366,8 +366,9 @@ class DiscountViewModel : ViewModel() {
         newRow.createCell(2).setCellValue(measurement.userName)
         newRow.createCell(3).setCellValue(measurement.block.toDouble())
         newRow.createCell(4).setCellValue(measurement.trial.toDouble())
-        newRow.createCell(5).setCellValue(measurement.value.toDouble())
-        newRow.createCell(6).setCellValue(measurement.side)
+        newRow.createCell(5).setCellValue(measurement.value)
+        val side = if ("izquierda" == measurement.side) "ahora" else if ("derecha" == measurement.side) "despues" else "valor_desconocido"
+        newRow.createCell(6).setCellValue(side)
         newRow.createCell(7).setCellValue(measurement.change.toString())
 
         // Write the changes to the file
