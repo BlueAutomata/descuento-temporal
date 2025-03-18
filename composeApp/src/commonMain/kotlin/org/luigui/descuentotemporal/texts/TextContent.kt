@@ -45,7 +45,7 @@ object TextContent {
     """
 
     const val InstructionsHeading = "Instrucciones Generales (Descuento temporal)" // This is a compile-time constant
-    const val NextButtonText = "Siguente" // This is a compile-time constant
+    const val NextButtonText = "Siguiente" // This is a compile-time constant
 
     private val RawInstructions = """
         A continuación, responderás a una serie de elecciones para ganar recompensas monetarias. No existen respuestas correctas o incorrectas, ni hay un tiempo límite para responder. Las recompensas no las recibirás durante las elecciones ni al final de la sesión, pero te pedimos que respondas como si fueras a ganarlas. Las recompensas no son acumulables a lo largo de las alternativas; cada recompensa es independiente una de la otra. Elige la opción que tú prefieras y no la que otra persona elegiría. Responde conforme a tus preferencias el día de HOY. Evita responder en función del pasado o futuro. 
