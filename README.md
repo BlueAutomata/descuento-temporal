@@ -62,6 +62,6 @@ En la realización de la tarea de descuento contribuyeron:
 ## Pasos para correr el programa
 1. Clonar el repositorio con git clone
 2. Abrir el proyecto con Android Studio o Intellij IDEA
-3. Abrir terminar
+3. Abrir el terminar
 4. Ejecutar `./gradlew packageMsi` para crear el instalador
 5. Ejecutar el archivo .msi para instalar el programa
