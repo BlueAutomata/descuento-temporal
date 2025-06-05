@@ -55,6 +55,13 @@ El botón seleccionado por el participante se presentaba con un color más oscur
 ## Personas que contribuyeron
 
 En la realización de la tarea de descuento contribuyeron:
-- Guillermo Luigui Ubaldo Nieto Angarita quien realizó el diseño y programación de la tarea, como también brindo asesoramiento de su descarga, uso y búsqueda de datos.
-- Heidy Lorena Merchan Moya quien brindo instrucciones frente a la realización de la tarea de descuento.
-- Carol Tatiana Sierra Quintana quien realizó diferentes pilotajes de la tarea brindando sugerencias que permitieran llegar al producto final.
+- **Guillermo Luigui Ubaldo Nieto Angarita** quien realizó el diseño y programación de la tarea, como también brindo asesoramiento de su descarga, uso y búsqueda de datos.
+- **Heidy Lorena Merchan Moya** quien brindo instrucciones frente a la realización de la tarea de descuento.
+- **Carol Tatiana Sierra Quintana** quien realizó diferentes pilotajes de la tarea brindando sugerencias que permitieran llegar al producto final.
+
+## Pasos para correr el programa
+1. Clonar el repositorio con git clone
+2. Abrir el proyecto con Android Studio o Intellij IDEA
+3. Abrir terminar
+4. Ejecutar `./gradlew packageMsi` para crear el instalador
+5. Ejecutar el archivo .msi para instalar el programa
