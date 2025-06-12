@@ -46,7 +46,7 @@ Cuando se seleccionaban de manera correcta los ejemplos, se direccionaba al part
 
 ![image](https://github.com/user-attachments/assets/37e64cd2-7120-4bc2-807c-2ef97e9fceb2)
 
-Al dar siguiente se comenzaba con la tare de descuento en el cual el participante realizaba su elección. 
+Al dar siguiente se comenzaba con la tarea de descuento en el cual el participante realizaba su elección. 
 
 ![image](https://github.com/user-attachments/assets/f1cc70a4-2cc8-489a-b8f3-46122819b859)
 
